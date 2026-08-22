@@ -35,4 +35,4 @@ with gr.Blocks(title="Deep Research") as ui:
 
 
 if __name__ == "__main__":
-    ui.launch(css=CSS, js=JS, theme=gr.themes.Base())
+    ui.launch(server_name="0.0.0.0", css=CSS, js=JS, theme=gr.themes.Base())
