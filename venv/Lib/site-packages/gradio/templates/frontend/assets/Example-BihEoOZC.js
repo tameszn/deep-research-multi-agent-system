@@ -1,0 +1,1 @@
+import{Et as e,F as t,G as n,Yt as r,et as i,nt as a,r as o,yt as s}from"./index-Dqxt3WGu.js";import"./core-Dxj6VlRm.js";var c=a(`<div><!></div>`);function l(a,l){let u=o(l,`selected`,3,!1);var d=c();let f;n(e(d),()=>l.value),r(d),s(()=>f=t(d,1,`prose svelte-s7j0w2`,null,f,{table:l.type===`table`,gallery:l.type===`gallery`,selected:u()})),i(a,d)}export{l as default};

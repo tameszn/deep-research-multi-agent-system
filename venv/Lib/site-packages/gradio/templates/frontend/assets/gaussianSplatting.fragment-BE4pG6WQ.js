@@ -1,0 +1,1 @@
+import{n as e}from"./splatFileLoader-C7T3eCrd.js";export{e as gaussianSplattingPixelShaderWGSL};
