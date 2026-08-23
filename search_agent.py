@@ -1,6 +1,6 @@
 from agents import Agent, WebSearchTool, ModelSettings,function_tool
 from ddgs import DDGS
-from model_config import gemini_model
+from model_config import search_model, gemini_model
 
 INSTRUCTIONS = """
 You are a research assistant. Given a search term, you search the web for that term and 
@@ -27,4 +27,4 @@ def web_search(query: str) -> str:
     )
 tools = [web_search]
 
-search_agent = Agent(name="Search Agent", instructions=INSTRUCTIONS, tools=tools, model=gemini_model, model_settings=settings)
+search_agent = Agent(name="Search Agent", instructions=INSTRUCTIONS, tools=tools, model=search_model, model_settings=settings)

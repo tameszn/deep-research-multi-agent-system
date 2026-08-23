@@ -1,6 +1,6 @@
 from agents import Agent, function_tool, ModelSettings
 from messenger import send_email, push
-from model_config import gemini_model
+from model_config import email_model
 import os
 from dotenv import load_dotenv
 
@@ -33,4 +33,4 @@ You are provided with a detailed report. Use your tool to send an email, convert
 a clean, well presented HTML email with an appropriate subject line.
 """
 
-email_agent = Agent(name="Email Agent", instructions=INSTRUCTIONS, tools=[send_email_tool], model=gemini_model, model_settings=settings)
+email_agent = Agent(name="Email Agent", instructions=INSTRUCTIONS, tools=[send_email_tool], model=email_model, model_settings=settings)

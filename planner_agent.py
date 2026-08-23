@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from agents import Agent
 import os
-from model_config import gemini_model
+from model_config import planner_model
 HOW_MANY_SEARCHES = int(os.getenv("HOW_MANY_SEARCHES", 5))
 
 
@@ -18,4 +18,4 @@ class WebSearchItem(BaseModel):
 class WebSearchPlan(BaseModel):
     searches: list[WebSearchItem] = Field(description="A list of web searches to perform to best answer the query.")
     
-planner_agent = Agent(name="Planner Agent", instructions=INSTRUCTIONS, model=gemini_model, output_type=WebSearchPlan)
+planner_agent = Agent(name="Planner Agent", instructions=INSTRUCTIONS, model=planner_model, output_type=WebSearchPlan)

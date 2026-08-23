@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from agents import Agent
-from model_config import gemini_model
+from model_config import gemini_model,writer_model
 
 INSTRUCTIONS = """
 You are a senior researcher tasked with writing a cohesive report for a research query.
@@ -17,4 +17,4 @@ class ReportData(BaseModel):
     follow_up_questions: list[str] = Field(description="Suggested topics to research further")
 
 
-writer_agent = Agent(name="Writer Agent", instructions=INSTRUCTIONS, model=gemini_model, output_type=ReportData)
+writer_agent = Agent(name="Writer Agent", instructions=INSTRUCTIONS, model=writer_model, output_type=ReportData)
