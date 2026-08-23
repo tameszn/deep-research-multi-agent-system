@@ -10,7 +10,7 @@
 
 InQuery automates web research. It is built for people who need accurate, well-organized information without spending hours manually collecting it:
 
-* **Market Researchers & Analysts:** Get quick, structured, and deep summaries on industry trends without manually reading and saving multiple sources.
+* **Researchers & Analysts:** Get quick, structured, and deep summaries on industry trends without manually reading and saving multiple sources.
 * **Executives & Founders:** Receive fast, accurate intelligence briefs delivered straight to your inbox, providing the facts needed for high-stakes decision-making.
 * **Academics & Writers:** Gather verified source data and outlines to start research papers or long-form articles.
 ## ✨ Key Features
@@ -21,12 +21,8 @@ InQuery automates web research. It is built for people who need accurate, well-o
 
 ## 🛠 Tech Stack
 
-Built with a modern, scalable Python ecosystem leveraging cutting-edge LLMs and agentic frameworks:
-
 * **Language:** Python
 * **Agent Frameworks:** `openai-agents`
-* **AI Models:** Google GenAI (Gemini)
-* **Search Engine:** DuckDuckGo Search (`ddgs`)
 * **Data Validation:** `Pydantic`
 * **Web Interface:** `Gradio`
 * **Formatting & Delivery:** `Requests`, `Markdown`, `Resend API`
