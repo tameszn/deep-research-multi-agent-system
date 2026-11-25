@@ -2,7 +2,7 @@ pydantic
 python-dotenv
 openai
 openai-agents
-gradio
+gradio>=6,<7
 requests
 ddgs
 markdown
