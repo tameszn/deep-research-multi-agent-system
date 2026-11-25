@@ -1,14 +1,14 @@
-from agents import Agent, WebSearchTool, ModelSettings,function_tool
+from agents import Agent, function_tool
 from ddgs import DDGS
-from model_config import search_model, gemini_model
+
+from model_config import search_model, settings
 
 INSTRUCTIONS = """
-You are a research assistant. Given a search term, you search the web for that term and 
-produce a concise summary of the results. The summary must 2-3 paragraphs and less than 300 words.
+You are a research assistant. Given a search term, call web_search once, then
+produce a concise summary of the results. The summary must be 2-3 paragraphs and less than 250 words.
 Capture the main points and be succinct. Reply only with the summary.
 """
 
-settings = ModelSettings(tool_choice="required")
 
 @function_tool
 def web_search(query: str) -> str:
@@ -22,9 +22,16 @@ def web_search(query: str) -> str:
         return "No results found."
 
     return "\n\n".join(
-        f"Title: {r['title']}\nSnippet: {r.get('body', '')}\nURL: {r['href']}"
+        f"Title: {r['title']}\nSnippet: {r.get('body', '')[:500]}\nURL: {r['href']}"
         for r in results
     )
-tools = [web_search]
 
-search_agent = Agent(name="Search Agent", instructions=INSTRUCTIONS, tools=tools, model=search_model, model_settings=settings)
+
+search_agent = Agent(
+    name="Search Agent",
+    instructions=INSTRUCTIONS,
+    tools=[web_search],
+    model=search_model,
+    # The SDK resets tool_choice after the first call, so the summary turn is free text.
+    model_settings=settings(1200, tool_choice="required"),
+)

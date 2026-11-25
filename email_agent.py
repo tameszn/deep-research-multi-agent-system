@@ -1,36 +1,52 @@
-from agents import Agent, function_tool, ModelSettings
-from messenger import send_email, push
-from model_config import email_model
 import os
+
+import markdown
+from agents import Agent, RunContextWrapper, function_tool
 from dotenv import load_dotenv
+
+from messenger import push, send_email
+from model_config import email_model, settings
+from writer_agent import ReportData
 
 load_dotenv(override=True)
 
 
 USE_EMAIL = os.getenv("USE_EMAIL", "true").lower() == "true"
 
-settings = ModelSettings(tool_choice="required")
+EMAIL_TEMPLATE = (
+    '<html><body style="font-family:Arial,sans-serif;line-height:1.6;'
+    'max-width:720px;margin:auto;padding:16px">{body}</body></html>'
+)
 
-@function_tool
-def send_email_tool(subject: str, text_body: str, html_body: str) -> str:
+
+# failure_error_function=None: an SMTP error must raise, not be reported to the model as text.
+@function_tool(failure_error_function=None)
+def send_email_tool(ctx: RunContextWrapper[ReportData], subject: str) -> str:
     """
-    Send out an email with the given subject and body
-    
+    Email the finished report with the given subject line.
+
     Args:
         subject: The subject of the email
-        text_body: The body of the email as plain text
-        html_body: The HTML body of the email
     """
+    report = ctx.context.markdown_report
     if USE_EMAIL:
-        send_email(subject, text_body, html_body)
+        body = markdown.markdown(report, extensions=["tables", "fenced_code", "sane_lists"])
+        send_email(subject, report, EMAIL_TEMPLATE.format(body=body))
     else:
-        push(f"Subject: {subject}\n\n{text_body}")
+        push(f"Subject: {subject}\n\n{report}")
     return "Email sent successfully"
 
 
 INSTRUCTIONS = """
-You are provided with a detailed report. Use your tool to send an email, converting the report into
-a clean, well presented HTML email with an appropriate subject line.
+You are given the summary of a research report. Call send_email_tool once with a clear,
+specific subject line. The report body is attached automatically.
 """
 
-email_agent = Agent(name="Email Agent", instructions=INSTRUCTIONS, tools=[send_email_tool], model=email_model, model_settings=settings)
+email_agent = Agent[ReportData](
+    name="Email Agent",
+    instructions=INSTRUCTIONS,
+    tools=[send_email_tool],
+    model=email_model,
+    model_settings=settings(500, tool_choice="required"),
+    tool_use_behavior="stop_on_first_tool",
+)

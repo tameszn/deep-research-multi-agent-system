@@ -1,14 +1,19 @@
-from pydantic import BaseModel, Field
-from agents import Agent
 import os
-from model_config import planner_model
+
+from agents import Agent
+from pydantic import BaseModel, Field
+
+from model_config import planner_model, settings
+
 HOW_MANY_SEARCHES = int(os.getenv("HOW_MANY_SEARCHES", 5))
 
 
 INSTRUCTIONS = f"""
 You are a research assistant. Given a user query, come up with a set of web searches
 to perform to best answer the query. Output {HOW_MANY_SEARCHES} terms to query for.
+Keep each reason to one sentence.
 """
+
 
 class WebSearchItem(BaseModel):
     reason: str = Field(description="Your reasoning for why this search is important to the query.")
@@ -17,5 +22,12 @@ class WebSearchItem(BaseModel):
 
 class WebSearchPlan(BaseModel):
     searches: list[WebSearchItem] = Field(description="A list of web searches to perform to best answer the query.")
-    
-planner_agent = Agent(name="Planner Agent", instructions=INSTRUCTIONS, model=planner_model, output_type=WebSearchPlan)
+
+
+planner_agent = Agent(
+    name="Planner Agent",
+    instructions=INSTRUCTIONS,
+    model=planner_model,
+    model_settings=settings(3000),  # reasoning tokens count against this cap
+    output_type=WebSearchPlan,
+)

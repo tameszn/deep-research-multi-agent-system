@@ -1,70 +1,41 @@
 import os
+
+from agents import ModelSettings, OpenAIChatCompletionsModel, set_tracing_disabled
 from dotenv import load_dotenv
 from openai import AsyncOpenAI
-from agents import OpenAIChatCompletionsModel
+from openai.types.shared import Reasoning
 
 load_dotenv(override=True)
 
-GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-GROQ_BASE_URL = "https://api.groq.com/openai/v1"
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+if not GROQ_API_KEY:
+    raise RuntimeError("GROQ_API_KEY is missing. Add it to your .env file.")
+
+# Traces upload to OpenAI, so they need an OpenAI key.
+TRACING_ENABLED = bool(os.getenv("OPENAI_API_KEY"))
+set_tracing_disabled(not TRACING_ENABLED)
 
 groq_client = AsyncOpenAI(
-    base_url=GROQ_BASE_URL,
-    api_key=GROQ_API_KEY
+    base_url="https://api.groq.com/openai/v1",
+    api_key=GROQ_API_KEY,
+    max_retries=8,  # rides out 429s; the client honours Retry-After
 )
 
-gemini_client = AsyncOpenAI(
-    base_url=GEMINI_BASE_URL,
-    api_key=GEMINI_API_KEY
-)
-
-openrouter_client = AsyncOpenAI(
-    base_url=OPENROUTER_BASE_URL,
-    api_key=OPENROUTER_API_KEY,
-    default_headers={
-        "HTTP-Referer": "http://localhost:7860",
-        "X-Title": "Deep Research Multi-Agent"
-    },
-    default_query={"max_tokens": 4096}
-)
-
-gemini_model = OpenAIChatCompletionsModel(
-    model="qwen/qwen3.6-27b",
-    openai_client=groq_client
-)
+FAST_MODEL = os.getenv("FAST_MODEL", "openai/gpt-oss-20b")
+# Separate rate-limit bucket from FAST_MODEL, and better long-form output.
+WRITER_MODEL = os.getenv("WRITER_MODEL", "openai/gpt-oss-120b")
 
 
+def _groq(model: str) -> OpenAIChatCompletionsModel:
+    return OpenAIChatCompletionsModel(model=model, openai_client=groq_client)
 
 
+def settings(max_tokens: int, **kwargs) -> ModelSettings:
+    """Low reasoning effort and capped output, to fit Groq's tokens-per-minute limit."""
+    return ModelSettings(max_tokens=max_tokens, reasoning=Reasoning(effort="low"), **kwargs)
 
-# 1. Planner Model: Fast schema generation & JSON compliance
-planner_model = OpenAIChatCompletionsModel(
-    model="qwen/qwen3.6-27b",
-    openai_client=groq_client,
-    
-)
 
-# 2. Search Agent Model: Rapid parallel tool calling & snippet extraction
-search_model = OpenAIChatCompletionsModel(
-    model="openrouter/free",
-    openai_client=openrouter_client,
-  
-)
-
-# 3. Writer Model: Deep reasoning & high-quality long-form markdown synthesis
-writer_model = OpenAIChatCompletionsModel(
-    model="openai/gpt-oss-120b",
-    openai_client=openrouter_client,
-  
-)
-
-# 4. Email / Messenger Model: Fast formatting & concise summarization
-email_model = OpenAIChatCompletionsModel(
-    model="nvidia/nemotron-3-super-120b-a12b:free",
-    openai_client=openrouter_client,
-   
-)
+planner_model = _groq(FAST_MODEL)
+search_model = _groq(FAST_MODEL)
+email_model = _groq(FAST_MODEL)
+writer_model = _groq(WRITER_MODEL)

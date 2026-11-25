@@ -36,3 +36,4 @@ with gr.Blocks(title="Deep Research") as ui:
 
 if __name__ == "__main__":
     ui.launch(server_name="0.0.0.0", css=CSS, js=JS, theme=gr.themes.Base())
+    # test locally at this link- http://127.0.0.1:7860/
